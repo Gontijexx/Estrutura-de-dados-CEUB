@@ -1,0 +1,343 @@
+<html>
+
+<head>
+<title>Lista de afazeres</title>
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"> 
+    <link rel="stylesheet" href="style.css" type="text/css" media="screen" charset="utf-8">    
+<style>
+    /* Basic Style */
+body {
+  background: rgb(61, 61, 61);
+  color: rgb(240, 240, 240);
+  font-family: 'Roboto', sans-serif;
+}
+.container {
+  display: block;
+  width: 100vw;
+  margin: 10 auto;
+}
+ul {
+  margin: 0;
+  padding: 0;
+}
+li * {
+  float: left;
+}
+li, h3 {
+  clear:both;
+  list-style:none;
+}
+input, button {
+  outline: none;
+}
+button {
+  background: none;
+  border: 0px;
+  color: rgb(240, 240, 240);
+  font-size: 1em;
+  width: 60px;
+  margin: 10px 0 0;
+  font-family: 'Roboto', sans-serif;
+  cursor: pointer;
+}
+button:hover {
+  color: rgb(185, 185, 185);
+}
+/* Heading */
+h3,
+label[for='new-task'] {
+  color: rgb(240, 240, 240);
+  font-weight: 700;
+  font-size: 15px;
+  border-bottom: 2px solid rgb(240, 240, 240);
+  padding: 30px 0 10px;
+  margin: 0;
+  text-transform: uppercase;
+}
+input[type="text"] {
+  margin: 0 ;
+  font-size: 18px;
+  line-height: 18px;
+  height: 18px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 6px;
+  font-family: 'Roboto', sans-serif;
+  color: #888;
+
+}
+input[type="text"]:focus {
+  color: #333;
+}
+
+/* New Task */
+label[for='new-task'] {
+  display: block;
+  margin: 30px 0 20px;
+}
+input#new-task {
+  float: left;
+  width: 318px;
+}
+p > button:hover {
+  color: rgb(15, 197, 39);
+}
+
+/* Task list */
+li {
+  overflow: hidden;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+li > input[type="checkbox"] {
+  margin: 0 30px;
+  position: relative;
+  top: 15px;
+}
+li > label {
+  font-size: 18px;
+  line-height: 40px;
+  width: 237px;
+  padding: 0 0 0 11px;
+}
+li >  input[type="text"] {
+  width: 226px;
+}
+li > .delete:hover {
+  color: rgb(230, 0, 0);
+}
+
+/* Completed */
+#completed-tasks label {
+  text-decoration: line-through;
+  color: #888;
+}
+
+/* Edit Task */
+ul li input[type=text] {
+  display:none;
+}
+
+ul li.editMode input[type=text] {
+  display:block;
+}
+
+ul li.editMode label {
+  display:none;
+}
+</style>
+</head>
+
+<body>
+    <div class="container">
+        <p>
+            <label for="new-task">Add Item</label>
+            <input id="new-task" type="text">
+            <button>Add</button>
+        </p>
+
+        <h3>Oque tenho pra Fazer</h3>
+        <ul id="incomplete-tasks">
+            <li>
+                <input type="checkbox">
+                <label>Pagar contas</label>
+                <input type="text">
+                <button class="edit">Editar</button>
+                <button class="delete">Deletar</button>
+            </li>
+            <li class="editMode">
+                <input type="checkbox"><label>ir ao shopping</label>
+                <input type="text" value="ir ao shopping">
+                <button class="edit">Editar</button>
+                <button class="delete">Deletar</button>
+            </li>
+
+        </ul>
+
+        <h3>Feito</h3>
+        <ul id="completed-tasks">
+            <li>
+                <input type="checkbox" checked>
+                <label>ir ao ortopedista olhar o joelho</label>
+                <input type="text">
+                <button class="edit">Editar</button>
+                <button class="delete">Deletar</button>
+            </li>
+        </ul>
+    </div>
+    <script type="text/javascript" src="app.js"></script>
+
+    <script>
+
+        let taskInput = document.getElementById("new-task"); //Add uma nova tarefa.
+        let addButton = document.getElementsByTagName("button")[0]; 
+        let incompleteTaskHolder = document.getElementById("incomplete-tasks"); //tarefas pedentes
+        let completedTasksHolder = document.getElementById("completed-tasks"); //tarefas concluidas
+
+
+        //lista de items de nova tarefa
+        var createNewTaskElement = function(taskString) {
+
+            var listItem = document.createElement("li");
+
+            //input (checkbox)
+            var checkBox = document.createElement("input"); //checkbx
+            //label
+            var label = document.createElement("label"); //label
+            //input (text)
+            var editInput = document.createElement("input"); //text
+            //button.edit
+            var editButton = document.createElement("button"); //edit button
+
+            //button.delete
+            var deleteButton = document.createElement("button"); //delete button
+
+            label.innerText = taskString;
+
+            //cada elemento listado abaixo, falta appending
+            checkBox.type = "checkbox";
+            editInput.type = "text";
+
+            editButton.innerText = "Editar"; //innerText aceita caracter especial, HTML nao.
+            editButton.className = "edit";
+            deleteButton.innerText = "Deletar";
+            deleteButton.className = "delete";
+
+
+
+            //e o append
+            listItem.appendChild(checkBox);
+            listItem.appendChild(label);
+            listItem.appendChild(editInput);
+            listItem.appendChild(editButton);
+            listItem.appendChild(deleteButton);
+            return listItem;
+        }
+
+
+
+        var addTask = function() {
+            console.log("Add Task...");
+            //cria uma nova lista de itens com o texto do #new-task:
+            var listItem = createNewTaskElement(taskInput.value);
+
+            //append o listItem ao incompleteTaskHolder
+            incompleteTaskHolder.appendChild(listItem);
+            bindTaskEvents(listItem, taskCompleted);
+
+            taskInput.value = "";
+
+        }
+
+        //Editar uma tarefa existente
+
+        var editTask = function() {
+            console.log("Edit Task...");
+            console.log("Change 'edit' to 'save'");
+
+
+            var listItem = this.parentNode;
+
+            var editInput = listItem.querySelector('input[type=text]');
+            var label = listItem.querySelector("label");
+            var containsClass = listItem.classList.contains("editMode");
+            //Descobre se a classe do pai está com .editmode
+            if (containsClass) {
+
+                //muda para .editmode
+                //label transforma o valor do input
+                label.innerText = editInput.value;
+            } else {
+                editInput.value = label.innerText;
+            }
+
+            //alterna o pai para .editmode.
+            listItem.classList.toggle("editMode");
+        }
+
+
+
+
+        //Deleta a tarefa.
+        var deleteTask = function() {
+            console.log("Delete Task...");
+
+            var listItem = this.parentNode;
+            var ul = listItem.parentNode;
+            //remove a lista de itens do pai da Lista não ordenada(ul)
+            ul.removeChild(listItem);
+
+        }
+
+
+        //Marca a tarefa como completeda
+        var taskCompleted = function() {
+            console.log("Complete Task...");
+
+            //da o append na list de itens para o #completed-tasks
+            var listItem = this.parentNode;
+            completedTasksHolder.appendChild(listItem);
+            bindTaskEvents(listItem, taskIncomplete);
+
+        }
+
+
+        var taskIncomplete = function() {
+            console.log("Incomplete Task...");
+            //marca a tarefa como incompleta
+            //enquanto a checkbox n está marcada
+            //da o append na lista de itens para o #incomplete-tasks
+            var listItem = this.parentNode;
+            incompleteTaskHolder.appendChild(listItem);
+            bindTaskEvents(listItem, taskCompleted);
+        }
+
+        //atribui o addTask a um botao
+        addButton.onclick = addTask;
+
+
+
+
+        var bindTaskEvents = function(taskListItem, checkBoxEventHandler) {
+            console.log("bind list item events");
+            //seleciona os children ListItems 
+            var checkBox = taskListItem.querySelector("input[type=checkbox]");
+            var editButton = taskListItem.querySelector("button.edit");
+            var deleteButton = taskListItem.querySelector("button.delete");
+
+
+            //atribui o editTask a um botao
+            editButton.onclick = editTask;
+            //atribui o deleteTask a um botao
+            deleteButton.onclick = deleteTask;
+            //atribui taskCompleted para a checkbox
+            checkBox.onchange = checkBoxEventHandler;
+        }
+
+        //le a lista de itens e adiciona
+        //para cada item na lista
+        for (var i = 0; i < incompleteTaskHolder.children.length; i++) {
+
+            //atribui events para a lista de itens filha(tasksCompleted)
+            bindTaskEvents(incompleteTaskHolder.children[i], taskCompleted);
+        }
+
+
+
+
+        //le a lista de itens feitos 
+        for (var i = 0; i < completedTasksHolder.children.length; i++) {
+            //atribui eventos para lista de itens filha(tasksIncompleted)
+            bindTaskEvents(completedTasksHolder.children[i], taskIncomplete);
+        }
+
+
+
+
+
+    </script>
+
+</body>
+
+</html>
